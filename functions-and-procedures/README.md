@@ -107,9 +107,82 @@ Side Effects
 - CPU Heat
 - CPU Time Delay
 
-## Minimize Side Effects
+### Minimize Side Effects
 
 Side effects take away the benefits of why we do functional programming in the first place. They nullify the benefits of functional programming. We want to make it very obvious in the cases where we use side effects that we are doing so.
 
 ### Avoid side effects where possible, otherwise make them obvious.
 
+
+# Pure Functions
+
+``` javascript
+
+// pure
+function addTwo(x,y) {
+  return x + y;
+}
+
+// impure
+function addAnother(x,y) {
+  return addTwo(x,y) + z
+}
+
+```
+
+addAnother takes two inputs and then uses a z variable that is outside of itself. That is an indirect input. Using an indirect input invalidates that nature of what thought we would be expecting from this function.
+
+``` javascript
+
+const z = 1;
+
+function addTwo(x, y) {
+  return x + y;
+}
+
+function addAnother(x,y) {
+  return addTwo(x,y) + z;
+}
+
+addAnother(20, 21);   // 42
+
+```
+
+It's a little more complicated than just saying that if a function accesses something from outside of itself, it is no longer a function.
+
+In the above example, if inside of return addAnother, we were to say:
+
+``` javascript
+return addTwo(x,y) + 1  
+```
+
+We wouldn't have a problem with addAnother and would say that it is a function. So when we declare a constant above named z and assign the value 1 to it, we are almost doing exactly the same thing. We could have even used the keyword var, the result is the same. We are not re-assigning z, so it is acting as a constant.
+
+The important key thing to keep in mind is this question:
+
+### Is the variable being reassigned?
+
+#### Not, can it be reassigned?
+
+## Even more important: is it obvious to the reader that it can't be reassigned or that it doesn't get reassigned?
+
+We want the reader of our code to understand that they don't need to worry about if our variables changed.
+
+### Reducing Surface Area
+
+``` javascript
+
+function addAnother(z) {
+  return function addTwo(x,y) {
+    return x + y + z;
+  };
+}
+
+addAnother(1)(20, 21);   // 42
+```
+
+When the addTwo function runs, it is referencing a variable outside of itself, it is referencing z, which is passed in from the addAnother function. This reduces the surface area of z being changed/altered. It can only be tampered with inside of the start of the addAnother function or the start of the addTwo function.
+
+This code has a smaller surface area that we need to worry about with respect to whether z is reassigned or not. 
+
+By reducing surface area, we are increasing readability.
